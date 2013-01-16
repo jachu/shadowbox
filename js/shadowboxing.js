@@ -31,6 +31,7 @@ var STACK_BLUR_RADIUS = 10;
 var mWidth = 240;
 var mHeight = 180;
 
+
 /*
  * Begin shadowboxing code
  */
@@ -55,6 +56,14 @@ $(document).ready(function() {
 	} else if (INPUT == "webcam") {
 		setUpWebCam();
 	}
+
+    $('#background').click(function() {
+        setBackground();
+        if (!started) {
+            renderShadow();
+        }
+    });
+    
 	$('#comp').click(function() {
         compare();
     });
@@ -185,6 +194,14 @@ function compare() {
 	
 	if (hasOverlap(sandData, shapeData)){
 		console.log("turn shape green");
+		for (var i=0;i<shapeData;i+=4)
+		  {
+		 	shapeData.data[i+0]=0;
+		  	shapeData.data[i+1]=255;
+		  	shapeData.data[i+2]=0;
+		  	shapeData.data[i+3]=255;
+		  }
+		shapeContext.putImageData(shapeData,10,10);
 	}
 	
 	//sandContext.putImageData(shapeData, 0, 0);
