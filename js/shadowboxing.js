@@ -28,12 +28,31 @@ var BACKGROUND_ALPHA = 0.05;
 // in the background subtraction. Change this radius to trade off noise for precision 
 var STACK_BLUR_RADIUS = 10; 
 
+var mWidth = 240;
+var mHeight = 180;
+
 
 /*
  * Begin shadowboxing code
  */
 var mediaStream, video, rawCanvas, rawContext, shadowCanvas, shadowContext, background = null;
 var kinect, kinectSocket = null;
+
+var rawSandCanvas = null;
+var rawSandContext = null;
+var sandCanvas = null;
+var sandContext = null;
+var sandBackground = null;
+var sandData = null;
+
+var testData = null;
+
+var rawDoCanvas = null;
+var rawDoContext = null;
+var doCanvas = null;
+var doContext = null;
+var doBackground = null;
+var doData = null;
 
 var started = false;
 
@@ -53,6 +72,19 @@ $(document).ready(function() {
             renderShadow();
         }
     });
+
+	$('#bg').click(function() {
+        setSandboxBG();
+    });
+
+	$('#bg2').click(function() {
+        setDo();
+    });
+
+	$('#comp').click(function() {
+        compare();
+    });
+
 });
 
 /*
@@ -65,8 +97,8 @@ function initializeDOMElements() {
     
     rawCanvas = document.createElement('canvas');
     rawCanvas.setAttribute('id', 'rawCanvas');
-    rawCanvas.setAttribute('width', 640);
-    rawCanvas.setAttribute('height', 480);
+    rawCanvas.setAttribute('width', mWidth);
+    rawCanvas.setAttribute('height', mHeight);
     rawCanvas.style.display = SHOW_RAW ? 'block' : 'none';
     document.getElementById('capture').appendChild(rawCanvas);
     rawContext = rawCanvas.getContext('2d');
@@ -76,11 +108,49 @@ function initializeDOMElements() {
     
     shadowCanvas = document.createElement('canvas');
     shadowCanvas.setAttribute('id', 'shadowCanvas');
-    shadowCanvas.setAttribute('width', 640);
-    shadowCanvas.setAttribute('height', 480);
+    shadowCanvas.setAttribute('width', mWidth);
+    shadowCanvas.setAttribute('height', mHeight);
     shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('capture').appendChild(shadowCanvas);
     shadowContext = shadowCanvas.getContext('2d');    
+
+    rawSandCanvas = document.createElement('canvas');
+    rawSandCanvas.setAttribute('id', 'rawSandCanvas');
+    rawSandCanvas.setAttribute('width', mWidth);
+    rawSandCanvas.setAttribute('height', mHeight);
+    rawSandCanvas.style.display = SHOW_RAW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(rawSandCanvas);
+    rawSandContext = rawSandCanvas.getContext('2d');
+    // mirror horizontally, so it acts like a reflection
+    rawSandContext.translate(rawSandCanvas.width, 0);
+    rawSandContext.scale(-1,1);
+    
+    sandCanvas = document.createElement('canvas');
+    sandCanvas.setAttribute('id', 'sandCanvas');
+    sandCanvas.setAttribute('width', mWidth);
+    sandCanvas.setAttribute('height', mHeight);
+    sandCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(sandCanvas);
+    sandContext = sandCanvas.getContext('2d');
+
+    rawDoCanvas = document.createElement('canvas');
+    rawDoCanvas.setAttribute('id', 'rawDoCanvas');
+    rawDoCanvas.setAttribute('width', mWidth);
+    rawDoCanvas.setAttribute('height', mHeight);
+    rawDoCanvas.style.display = SHOW_RAW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(rawDoCanvas);
+    rawDoContext = rawDoCanvas.getContext('2d');
+    // mirror horizontally, so it acts like a reflection
+    rawDoContext.translate(rawDoCanvas.width, 0);
+    rawDoContext.scale(-1,1);
+    
+    doCanvas = document.createElement('canvas');
+    doCanvas.setAttribute('id', 'doCanvas');
+    doCanvas.setAttribute('width', mWidth);
+    doCanvas.setAttribute('height', mHeight);
+    doCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(doCanvas);
+    doContext = doCanvas.getContext('2d');
 }
 
 
@@ -194,6 +264,73 @@ function getCameraData() {
 function setBackground() {
     var pixelData = getCameraData();
     background = pixelData;
+    console.log("background");
+    console.log(background);
+}
+
+function setSandboxBG() {
+	console.log("simon says");
+	console.log(pixelData);
+	//this works because pixeldata is being updated constantly
+	sandData = pixelData;
+    sandContext.putImageData(pixelData, 0, 0);
+}
+
+function setDo() {
+	console.log("sandbox");
+	console.log(pixelData);
+	//this works because pixeldata is being updated constantly
+	doData = pixelData;
+    doContext.putImageData(pixelData, 0, 0);
+}
+
+function compare() {
+	console.log("pixel data data");
+	var match = true;
+	
+	for (var i = 0; i < sandData.data.length; i = i + 4) {
+		//console.log(sandData.data[i]);
+		//console.log(sandData.data[i+1]);
+		//console.log(sandData.data[i+2]);
+		var r0 = sandData.data[i] == 0;
+		var g0 = sandData.data[i+1] == 0;
+		var b0 = sandData.data[i+2] == 0;
+		var isShadow = (r0 && g0 && b0);
+		
+		if (!isShadow) {
+		
+			var r255 = doData.data[i] == 255;
+			//if (r) console.log("r match");
+			// if (!r) {
+			// 	match = false;
+			// }
+			var g255 = doData.data[i+1] == 255;
+			//if (g) console.log("r match");
+			// if (!g) {
+			// 	match = false;
+			// }
+			var b255 = doData.data[i+2] == 255;
+			//if (b) console.log("r match");
+			// if (!b) {
+			// 	match = false;
+			// }
+			
+			var isWhite = (r255 && g255 && b255);
+		
+			if (!isWhite) {
+				match = false;
+				doData.data[i] = 255;
+				doData.data[i+1] = 0;
+				doData.data[i+2] = 0;
+			}
+		}
+	}
+	if (match) {
+		console.log("match!");
+	} else {
+		console.log("no match");
+		doContext.putImageData(doData, 0, 0);
+	}
 }
 
 /*
@@ -201,13 +338,13 @@ function setBackground() {
  * and outputs the difference as a shadow.
  */
 function renderShadow() {
-  if (!background) {
-    return;
-  }
+  	if (!background) {
+    	return;
+  	}
   
-  pixelData = getShadowData();
-  shadowContext.putImageData(pixelData, 0, 0);
-  setTimeout(renderShadow, 0);
+  	pixelData = getShadowData();
+  	shadowContext.putImageData(pixelData, 0, 0);
+  	setTimeout(renderShadow, 0);
 }
 
 /*
@@ -246,7 +383,7 @@ function getShadowData() {
             pixelData.data[i+1] = 255;
             pixelData.data[i+2] = 255;
             pixelData.data[i+3] = 0;
-        }        
+        }
     }
     
     return pixelData; 
