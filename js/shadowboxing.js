@@ -269,11 +269,14 @@ function setBackground() {
 }
 
 function setSandboxBG() {
+	console.log(pixelData);
+	/*
 	console.log("simon says");
 	console.log(pixelData);
 	//this works because pixeldata is being updated constantly
 	sandData = pixelData;
     sandContext.putImageData(pixelData, 0, 0);
+  */
 }
 
 function setDo() {
