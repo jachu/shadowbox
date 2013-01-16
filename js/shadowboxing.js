@@ -88,16 +88,15 @@ function initializeDOMElements() {
     rawContext = rawCanvas.getContext('2d');
     // mirror horizontally, so it acts like a reflection
     rawContext.translate(rawCanvas.width, 0);
-    rawContext.scale(-1,1);    
+    rawContext.scale(-1,1);
     
-    shadowCanvas = document.createElement('canvas');
-    shadowCanvas.setAttribute('id', 'shadowCanvas');
+    shadowCanvas = document.getElementById('shadowCanvas');
     shadowCanvas.setAttribute('width', mWidth);
     shadowCanvas.setAttribute('height', mHeight);
     shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-    document.getElementById('capture').appendChild(shadowCanvas);
     shadowContext = shadowCanvas.getContext('2d');
     
+    /*
     sandCanvas = document.createElement('canvas');
     sandCanvas.setAttribute('id', 'sandCanvas');
     sandCanvas.setAttribute('width', mWidth);
@@ -105,13 +104,12 @@ function initializeDOMElements() {
     sandCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('sandbox').appendChild(sandCanvas);
     sandContext = sandCanvas.getContext('2d');
+    */
     
-    shapeCanvas = document.createElement('canvas');
-    shapeCanvas.setAttribute('id', 'doCanvas');
+    shapeCanvas = document.getElementById('shapeCanvas');
     shapeCanvas.setAttribute('width', mWidth);
     shapeCanvas.setAttribute('height', mHeight);
     shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-    document.getElementById('sandbox').appendChild(shapeCanvas);
     shapeContext = shapeCanvas.getContext('2d');
     //draw a square for now
     var imgData=shapeContext.createImageData(100,100);
@@ -189,19 +187,9 @@ function hasOverlap(pixelData1, pixelData2){
 
 function compare() {
 	
-	sandContext.putImageData(pixelData, 0, 0);
-	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
-	
-	if (hasOverlap(sandData, shapeData)){
+//	if (hasOverlap(pixelData, shapeData)){
+	if (true) {
 		console.log("turn shape green");
-		for (var i=0;i<shapeData;i+=4)
-		  {
-		 	shapeData.data[i+0]=0;
-		  	shapeData.data[i+1]=255;
-		  	shapeData.data[i+2]=0;
-		  	shapeData.data[i+3]=255;
-		  }
-		shapeContext.putImageData(shapeData,10,10);
 	}
 	
 	//sandContext.putImageData(shapeData, 0, 0);
