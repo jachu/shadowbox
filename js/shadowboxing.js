@@ -151,66 +151,37 @@ function initializeDOMElements() {
     doCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('sandbox').appendChild(doCanvas);
     doContext = doCanvas.getContext('2d');
-}
-
-
-/*
- * Starts the connection to the Kinect
- */
-function setUpKinect() {
-	kinect.sessionPersist()
-		  .modal.make('css/knctModal.css')
-		  .notif.make();
-		  
-	kinect.addEventListener('openedSocket', function() {
-		startKinect();
-	});
-}
-
-/*
- * Starts the socket for depth or RGB messages from KinectSocketServer
- */
-function startKinect() {
-	if (INPUT != "kinectdepth" && INPUT != "kinectrgb") {
-		console.log("Asking for incorrect socket from Kinect.");
-		return;
-	}
-	
-	if(kinectSocket)
-	{
-		kinectSocket.send( "KILL" );
-		setTimeout(function() {
-			kinectSocket.close();
-			kinectSocket.onopen = kinectSocket.onmessage = kinectSocket = null;
-		}, 300 );
-		return false;
-	}
-	
-	// Web sockets
-	if (INPUT == "kinectdepth") {
-		kinectSocket = kinect.makeDepth(null, true, null);
-	} else if (INPUT == "kinectrgb") {
-		kinectSocket = kinect.makeRGB(null, true, null);
-	}
-
-	kinectSocket.onopen = function() {
-	};
-	
-	kinectSocket.onclose = kinectSocket.onerror = function() {
-		kinectSocket.onclose = kinectSocket.onerror = null;
-		return false;
-	};
-
-	kinectSocket.onmessage = function( e ) {
-		if (e.data.indexOf("data:image/jpeg") == 0) {
-			var image = new Image();
-			image.src = e.data;
-			image.onload = function() {
-				rawContext.drawImage(image, 0, 0, 640, 480);
-			}
-			return false;
-		}
-	};
+    
+    
+    //Make a fixed shape on a canvas.
+    rawShapeCanvas = document.createElement('canvas');
+    rawShapeCanvas.setAttribute('id', 'rawShapeCanvas');
+    rawShapeCanvas.setAttribute('width', mWidth);
+    rawShapeCanvas.setAttribute('height', mHeight);
+    rawShapeCanvas.style.display = SHOW_RAW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(rawShapeCanvas);
+    rawShapeContext = rawShapeCanvas.getContext('2d');
+    // mirror horizontally, so it acts like a reflection
+    rawShapeContext.translate(rawShapeCanvas.width, 0);
+    rawShapeContext.scale(-1,1);
+    
+    shapeCanvas = document.createElement('canvas');
+    shapeCanvas.setAttribute('id', 'doCanvas');
+    shapeCanvas.setAttribute('width', mWidth);
+    shapeCanvas.setAttribute('height', mHeight);
+    shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('sandbox').appendChild(shapeCanvas);
+    shapeContext = shapeCanvas.getContext('2d');
+    
+    var imgData=shapeContext.createImageData(100,100);
+	for (var i=0;i<imgData.data.length;i+=4)
+	  {
+	  imgData.data[i+0]=0;
+	  imgData.data[i+1]=0;
+	  imgData.data[i+2]=0;
+	  imgData.data[i+3]=255;
+	  }
+	shapeContext.putImageData(imgData,10,10);
 }
 
 /*
@@ -269,14 +240,11 @@ function setBackground() {
 }
 
 function setSandboxBG() {
-	console.log(pixelData);
-	/*
 	console.log("simon says");
 	console.log(pixelData);
 	//this works because pixeldata is being updated constantly
 	sandData = pixelData;
     sandContext.putImageData(pixelData, 0, 0);
-  */
 }
 
 function setDo() {
