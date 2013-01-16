@@ -11,6 +11,26 @@
     <body>
         <div id="capture">
             <button id="background">Capture Background</button>        
-        </div>    
+        </div>
+        
+        
+        <div id="canvasesdiv" style="position:relative; width:400px; height:300px">
+					<canvas id="shadowLayer"
+					style="z-index: 1;
+					position:absolute;
+					left:0px;
+					top:0px;
+					" height="300px" width="400">
+					This text is displayed if your browser does not support HTML5 Canvas.
+					</canvas>
+					<canvas id="shapesLayer"
+					style="z-index: 2;
+					position:absolute;
+					left:0px;
+					top:0px;
+					" height="300px" width="400">
+					This text is displayed if your browser does not support HTML5 Canvas.
+					</canvas>
+				</div>
     </body>
 </html>

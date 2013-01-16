@@ -31,32 +31,22 @@ var STACK_BLUR_RADIUS = 10;
 var mWidth = 240;
 var mHeight = 180;
 
-
 /*
  * Begin shadowboxing code
  */
 var mediaStream, video, rawCanvas, rawContext, shadowCanvas, shadowContext, background = null;
-var kinect, kinectSocket = null;
 
-var rawSandCanvas = null;
-var rawSandContext = null;
 var sandCanvas = null;
 var sandContext = null;
-var sandBackground = null;
 var sandData = null;
-
-var testData = null;
-
-var rawDoCanvas = null;
-var rawDoContext = null;
-var doCanvas = null;
-var doContext = null;
-var doBackground = null;
-var doData = null;
+var shapeCanvas = null;
+var shapeData = null;
+var shapeData = null;
 
 var started = false;
 
 $(document).ready(function() {
+		
     initializeDOMElements();
 
     $("#background").attr('disabled', true);
@@ -65,22 +55,6 @@ $(document).ready(function() {
 	} else if (INPUT == "webcam") {
 		setUpWebCam();
 	}
-
-    $('#background').click(function() {
-        setBackground();
-        if (!started) {
-            renderShadow();
-        }
-    });
-
-	$('#bg').click(function() {
-        setSandboxBG();
-    });
-
-	$('#bg2').click(function() {
-        setDo();
-    });
-
 	$('#comp').click(function() {
         compare();
     });
@@ -91,6 +65,7 @@ $(document).ready(function() {
  * Creates the video and canvas elements
  */
 function initializeDOMElements() {
+	
     video = document.createElement('video');
     video.setAttribute('autoplay', true);
     video.style.display = 'none';
@@ -112,18 +87,7 @@ function initializeDOMElements() {
     shadowCanvas.setAttribute('height', mHeight);
     shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('capture').appendChild(shadowCanvas);
-    shadowContext = shadowCanvas.getContext('2d');    
-
-    rawSandCanvas = document.createElement('canvas');
-    rawSandCanvas.setAttribute('id', 'rawSandCanvas');
-    rawSandCanvas.setAttribute('width', mWidth);
-    rawSandCanvas.setAttribute('height', mHeight);
-    rawSandCanvas.style.display = SHOW_RAW ? 'block' : 'none';
-    document.getElementById('sandbox').appendChild(rawSandCanvas);
-    rawSandContext = rawSandCanvas.getContext('2d');
-    // mirror horizontally, so it acts like a reflection
-    rawSandContext.translate(rawSandCanvas.width, 0);
-    rawSandContext.scale(-1,1);
+    shadowContext = shadowCanvas.getContext('2d');
     
     sandCanvas = document.createElement('canvas');
     sandCanvas.setAttribute('id', 'sandCanvas');
@@ -132,38 +96,6 @@ function initializeDOMElements() {
     sandCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('sandbox').appendChild(sandCanvas);
     sandContext = sandCanvas.getContext('2d');
-
-    rawDoCanvas = document.createElement('canvas');
-    rawDoCanvas.setAttribute('id', 'rawDoCanvas');
-    rawDoCanvas.setAttribute('width', mWidth);
-    rawDoCanvas.setAttribute('height', mHeight);
-    rawDoCanvas.style.display = SHOW_RAW ? 'block' : 'none';
-    document.getElementById('sandbox').appendChild(rawDoCanvas);
-    rawDoContext = rawDoCanvas.getContext('2d');
-    // mirror horizontally, so it acts like a reflection
-    rawDoContext.translate(rawDoCanvas.width, 0);
-    rawDoContext.scale(-1,1);
-    
-    doCanvas = document.createElement('canvas');
-    doCanvas.setAttribute('id', 'doCanvas');
-    doCanvas.setAttribute('width', mWidth);
-    doCanvas.setAttribute('height', mHeight);
-    doCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-    document.getElementById('sandbox').appendChild(doCanvas);
-    doContext = doCanvas.getContext('2d');
-    
-    
-    //Make a fixed shape on a canvas.
-    rawShapeCanvas = document.createElement('canvas');
-    rawShapeCanvas.setAttribute('id', 'rawShapeCanvas');
-    rawShapeCanvas.setAttribute('width', mWidth);
-    rawShapeCanvas.setAttribute('height', mHeight);
-    rawShapeCanvas.style.display = SHOW_RAW ? 'block' : 'none';
-    document.getElementById('sandbox').appendChild(rawShapeCanvas);
-    rawShapeContext = rawShapeCanvas.getContext('2d');
-    // mirror horizontally, so it acts like a reflection
-    rawShapeContext.translate(rawShapeCanvas.width, 0);
-    rawShapeContext.scale(-1,1);
     
     shapeCanvas = document.createElement('canvas');
     shapeCanvas.setAttribute('id', 'doCanvas');
@@ -172,7 +104,7 @@ function initializeDOMElements() {
     shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('sandbox').appendChild(shapeCanvas);
     shapeContext = shapeCanvas.getContext('2d');
-    
+    //draw a square for now
     var imgData=shapeContext.createImageData(100,100);
 	for (var i=0;i<imgData.data.length;i+=4)
 	  {
@@ -182,6 +114,7 @@ function initializeDOMElements() {
 	  imgData.data[i+3]=255;
 	  }
 	shapeContext.putImageData(imgData,10,10);
+	shapeData = shapeContext.getImageData(0, 0, shapeCanvas.width, shapeCanvas.height);
 }
 
 /*
@@ -235,27 +168,31 @@ function getCameraData() {
 function setBackground() {
     var pixelData = getCameraData();
     background = pixelData;
-    console.log("background");
-    console.log(background);
 }
 
-function setSandboxBG() {
-	console.log("simon says");
-	console.log(pixelData);
-	//this works because pixeldata is being updated constantly
-	sandData = pixelData;
-    sandContext.putImageData(pixelData, 0, 0);
-}
-
-function setDo() {
-	console.log("sandbox");
-	console.log(pixelData);
-	//this works because pixeldata is being updated constantly
-	doData = pixelData;
-    doContext.putImageData(pixelData, 0, 0);
+/*
+iterate through pixelData1, if you encounter a black pixel, check that pixel in pixelData2
+if both are black, retrun true
+*/
+function hasOverlap(pixelData1, pixelData2){
+	
 }
 
 function compare() {
+	
+	sandContext.putImageData(pixelData, 0, 0);
+	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
+	
+	if (hasOverlap(sandData, shapeData)){
+		console.log("turn shape green");
+	}
+	
+	//sandContext.putImageData(shapeData, 0, 0);
+	
+	//need to compare the sandData to the shapeData
+	
+	
+	/* LAO'S SIMON SAYS COMPARE
 	console.log("pixel data data");
 	var match = true;
 	
@@ -302,6 +239,7 @@ function compare() {
 		console.log("no match");
 		doContext.putImageData(doData, 0, 0);
 	}
+	*/
 }
 
 /*
@@ -314,6 +252,9 @@ function renderShadow() {
   	}
   
   	pixelData = getShadowData();
+  	
+  	//put logic to color the pixels that have overlap here
+  	
   	shadowContext.putImageData(pixelData, 0, 0);
   	setTimeout(renderShadow, 0);
 }
