@@ -290,6 +290,9 @@ function turnShapeBlack(shpData) {
 
 function compare() {
 	
+	//Currently, renderShadow does all of the following code. So, we don't need to press the
+	//compare button anymore. This is just a test though.
+	
 	sandContext.putImageData(pixelData, 0, 0);
 	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
 
@@ -373,6 +376,7 @@ function renderShadow() {
   	
   	shadowContext.putImageData(pixelData, 0, 0);
 
+	//We can combine buttons. This is test code.
 	sandContext.putImageData(pixelData, 0, 0);
 	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
 
@@ -383,6 +387,7 @@ function renderShadow() {
 		//console.log("turn back");
 		turnShapeBlack(shapeData);
 	}
+	//End of test code.
 
   	setTimeout(renderShadow, 0);
 }
