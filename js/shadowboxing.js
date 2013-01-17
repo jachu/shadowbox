@@ -91,8 +91,7 @@ function initializeDOMElements() {
     rawContext.translate(rawCanvas.width, 0);
     rawContext.scale(-1,1);    
     
-    shadowCanvas = document.createElement('canvas');
-    shadowCanvas.setAttribute('id', 'shadowCanvas');
+    shadowCanvas = document.getElementById('shadowCanvas');
     shadowCanvas.setAttribute('width', mWidth);
     shadowCanvas.setAttribute('height', mHeight);
     shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
@@ -107,8 +106,7 @@ function initializeDOMElements() {
     document.getElementById('sandbox').appendChild(sandCanvas);
     sandContext = sandCanvas.getContext('2d');
     
-    shapeCanvas = document.createElement('canvas');
-    shapeCanvas.setAttribute('id', 'doCanvas');
+    shapeCanvas = document.getElementById('shapeCanvas');
     shapeCanvas.setAttribute('width', mWidth);
     shapeCanvas.setAttribute('height', mHeight);
     shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
@@ -377,10 +375,11 @@ function renderShadow() {
   	shadowContext.putImageData(pixelData, 0, 0);
 
 	//We can combine buttons. This is test code.
-	sandContext.putImageData(pixelData, 0, 0);
-	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
+	//sandContext.putImageData(pixelData, 0, 0);
+	//sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
 
-	if (hasOverlapTest(sandData, shapeData)) {
+	//if (hasOverlapTest(sandData, shapeData)) {
+	if (hasOverlapTest(pixelData, shapeData)) {
 		//console.log("turn shape green func");
 		turnShapeGreen(shapeData);
 	} else {
