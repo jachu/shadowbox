@@ -30,6 +30,7 @@ var STACK_BLUR_RADIUS = 10;
 
 var mWidth = 240;
 var mHeight = 180;
+var compareBlack = true;
 
 
 /*
@@ -192,39 +193,99 @@ function setBackground() {
 iterate through pixelData1, if you encounter a black pixel, check that pixel in pixelData2
 if both are black, retrun true
 */
-function hasOverlapTest(pixelData1, pixelData2) {
-	var hasOverlap = false;
-	
-	for (var i = 0; i < pixelData2.data.length; i = i + 4) {
-		var shapeR = (pixelData2.data[i] == 0);
-		var shapeG = (pixelData2.data[i+1] == 0);
-		var shapeB = (pixelData2.data[i+2] == 0);
-		var shapePixelIsBlack = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
+function hasOverlapTest(pixelData1, pixelData2) {	
+	if (compareBlack) {
+		//console.log("comparing black");
+		for (var i = 0; i < pixelData2.data.length; i = i + 4) {
+			var shapeR = (pixelData2.data[i] == 0);
+			var shapeG = (pixelData2.data[i+1] == 0);
+			var shapeB = (pixelData2.data[i+2] == 0);
+			var shapePixelIsBlack = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
 		
-		if (shapePixelIsBlack) {
-			var sandR = (pixelData1.data[i] == 0);
-			var sandG = (pixelData1.data[i+1] == 0);
-			var sandB = (pixelData1.data[i+2] == 0);
-			var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
-			if (sandPixelIsBlack) {
-				// console.log(pixelData1.data[i]);
-				// console.log(pixelData1.data[i+1]);
-				// console.log(pixelData1.data[i+2]);
-				// console.log(pixelData1.data[i+3]);
-				hasOverlap = true;
+			if (shapePixelIsBlack) {
+				var sandR = (pixelData1.data[i] == 0);
+				var sandG = (pixelData1.data[i+1] == 0);
+				var sandB = (pixelData1.data[i+2] == 0);
+				var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
+				if (sandPixelIsBlack) {
+					// console.log(pixelData1.data[i]);
+					// console.log(pixelData1.data[i+1]);
+					// console.log(pixelData1.data[i+2]);
+					// console.log(pixelData1.data[i+3]);
+					//console.log("has overlap 2");
+					compareBlack = false;
+					return true;
+				} else {
+					//console.log("no overlap 2");
+				}
+			}
+		}
+	} else {
+		//console.log("comparing green");
+		for (var i = 0; i < pixelData2.data.length; i = i + 4) {
+			var shapeR = (pixelData2.data[i] == 0);
+			var shapeG = (pixelData2.data[i+1] == 255);
+			var shapeB = (pixelData2.data[i+2] == 0);
+			var shapePixelIsGreen = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
+		
+			if (shapePixelIsGreen) {
+				var sandR = (pixelData1.data[i] == 0);
+				var sandG = (pixelData1.data[i+1] == 0);
+				var sandB = (pixelData1.data[i+2] == 0);
+				var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
+				if (sandPixelIsBlack) {
+					// console.log(pixelData1.data[i]);
+					// console.log(pixelData1.data[i+1]);
+					// console.log(pixelData1.data[i+2]);
+					// console.log(pixelData1.data[i+3]);
+					//console.log("has overlap 3");
+					return true;
+				} else {
+					//console.log("no overlap 3");
+				}
 			}
 		}
 	}
-	
-	if (hasOverlap) {
-		console.log("has overlap");
-	} else {
-		console.log("no overlap");
-	}
-	
-	return hasOverlap;
+	compareBlack = true;
+	return false;
 	
 	//shapeContext.putImageData(pixelData2, 0, 0);
+}
+
+function turnShapeGreen(shpData) {
+	for (var i = 0; i < shpData.data.length; i += 4) {
+		var shapeR = (shpData.data[i+0] == 0);
+		var shapeG = (shpData.data[i+1] == 0);
+		var shapeB = (shpData.data[i+2] == 0);
+		var shapeA = (shapeData.data[i+3] == 255);
+		
+		var shapePixelIsBlack = (shapeR && shapeG && shapeB && shapeA);
+		if (shapePixelIsBlack) {
+		 	shpData.data[i+0]=0;
+		  	shpData.data[i+1]=255;
+		  	shpData.data[i+2]=0;
+		  	shpData.data[i+3]=255;
+		}
+	}
+	shapeContext.putImageData(shpData,10,10);
+}
+
+function turnShapeBlack(shpData) {
+	for (var i = 0; i < shpData.data.length; i += 4) {
+		var shapeR = (shpData.data[i+0] == 0);
+		var shapeG = (shpData.data[i+1] == 255);
+		var shapeB = (shpData.data[i+2] == 0);
+		var shapeA = (shapeData.data[i+3] == 255);
+		
+		var shapePixelIsGreen = (shapeR && shapeG && shapeB && shapeA);
+		if (shapePixelIsGreen) {
+		 	shpData.data[i+0]=0;
+		  	shpData.data[i+1]=0;
+		  	shpData.data[i+2]=0;
+		  	shpData.data[i+3]=255;
+		}
+	}
+	shapeContext.putImageData(shpData,10,10);
 }
 
 function compare() {
@@ -233,22 +294,14 @@ function compare() {
 	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
 
 	if (hasOverlapTest(sandData, shapeData)) {
-		console.log("turn shape green");
-		for (var i = 0; i < shapeData.data.length; i += 4) {
-			var shapeR2 = (shapeData.data[i+0] == 0);
-			var shapeG2 = (shapeData.data[i+1] == 0);
-			var shapeB2 = (shapeData.data[i+2] == 0);
-			
-			var shapePixelIsBlack2 = (shapeR2 && shapeG2 && shapeB2 && shapeData.data[i+3] == 255);
-			if (shapePixelIsBlack2) {
-			 	shapeData.data[i+0]=0;
-			  	shapeData.data[i+1]=255;
-			  	shapeData.data[i+2]=0;
-			  	shapeData.data[i+3]=255;
-			}
-		}
-		shapeContext.putImageData(shapeData,10,10);
+		//console.log("turn shape green func");
+		turnShapeGreen(shapeData);
+	} else {
+		//console.log("turn back");
+		turnShapeBlack(shapeData);
 	}
+	
+	setTimeout(compare, 0);
 	
 	//sandContext.putImageData(shapeData, 0, 0);
 	
@@ -319,6 +372,18 @@ function renderShadow() {
   	//put logic to color the pixels that have overlap here
   	
   	shadowContext.putImageData(pixelData, 0, 0);
+
+	sandContext.putImageData(pixelData, 0, 0);
+	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
+
+	if (hasOverlapTest(sandData, shapeData)) {
+		//console.log("turn shape green func");
+		turnShapeGreen(shapeData);
+	} else {
+		//console.log("turn back");
+		turnShapeBlack(shapeData);
+	}
+
   	setTimeout(renderShadow, 0);
 }
 
