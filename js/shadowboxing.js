@@ -113,6 +113,13 @@ function initializeDOMElements() {
     shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('sandbox').appendChild(shapeCanvas);
     shapeContext = shapeCanvas.getContext('2d');
+
+	// var test = shapeContext.getImageData(0, 0, shapeCanvas.width, shapeCanvas.height);
+	// console.log("test");
+	// console.log(test.data[0]);
+	// console.log(test.data[1]);
+	// console.log(test.data[2]);
+	// console.log(test.data[3]);
     //draw a square for now
     var imgData=shapeContext.createImageData(100,100);
 	for (var i=0;i<imgData.data.length;i+=4)
@@ -120,6 +127,8 @@ function initializeDOMElements() {
 	  imgData.data[i+0]=0;
 	  imgData.data[i+1]=0;
 	  imgData.data[i+2]=0;
+	
+		//this is where a problem is
 	  imgData.data[i+3]=255;
 	  }
 	shapeContext.putImageData(imgData,10,10);
@@ -183,24 +192,57 @@ function setBackground() {
 iterate through pixelData1, if you encounter a black pixel, check that pixel in pixelData2
 if both are black, retrun true
 */
-function hasOverlap(pixelData1, pixelData2){
+function hasOverlapTest(pixelData1, pixelData2) {
+	var hasOverlap = false;
 	
+	for (var i = 0; i < pixelData2.data.length; i = i + 4) {
+		var shapeR = pixelData2.data[i+0] == 0;
+		var shapeG = pixelData2.data[i+1] == 0;
+		var shapeB = pixelData2.data[i+2] == 0;
+		var shapePixelIsBlack = (shapeR && shapeG && shapeB);
+		
+		if (shapePixelIsBlack) {
+			var sandR = pixelData1.data[i+0] == 0;
+			var sandG = pixelData1.data[i+1] == 0;
+			var sandB = pixelData1.data[i+2] == 0;
+			var sandPixelIsBlack = (sandR && sandG && sandB);
+			if (sandPixelIsBlack) {
+				hasOverlap = true;
+			}
+		}
+	}
+	
+	if (hasOverlap) {
+		console.log("has overlap");
+	} else {
+		console.log("no overlap");
+	}
+	
+	return hasOverlap;
+	
+	//shapeContext.putImageData(pixelData2, 0, 0);
 }
 
 function compare() {
 	
 	sandContext.putImageData(pixelData, 0, 0);
 	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
-	
-	if (hasOverlap(sandData, shapeData)){
+
+	if (hasOverlapTest(sandData, shapeData)) {
 		console.log("turn shape green");
-		for (var i=0;i<shapeData;i+=4)
-		  {
-		 	shapeData.data[i+0]=0;
-		  	shapeData.data[i+1]=255;
-		  	shapeData.data[i+2]=0;
-		  	shapeData.data[i+3]=255;
-		  }
+		for (var i = 0; i < shapeData.data.length; i += 4) {
+			var shapeR2 = (shapeData.data[i+0] == 0);
+			var shapeG2 = (shapeData.data[i+1] == 0);
+			var shapeB2 = (shapeData.data[i+2] == 0);
+			
+			var shapePixelIsBlack2 = (shapeR2 && shapeG2 && shapeB2 && shapeData.data[i+3] == 255);
+			if (shapePixelIsBlack2) {
+			 	shapeData.data[i+0]=0;
+			  	shapeData.data[i+1]=255;
+			  	shapeData.data[i+2]=0;
+			  	shapeData.data[i+3]=255;
+			}
+		}
 		shapeContext.putImageData(shapeData,10,10);
 	}
 	
