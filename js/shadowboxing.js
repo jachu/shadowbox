@@ -96,7 +96,7 @@ function initializeDOMElements() {
     rawCanvas.setAttribute('width', mWidth);
     rawCanvas.setAttribute('height', mHeight);
     rawCanvas.style.display = SHOW_RAW ? 'block' : 'none';
-    document.getElementById('capture').appendChild(rawCanvas);
+    document.getElementById('canvasesdiv').appendChild(rawCanvas);
     rawContext = rawCanvas.getContext('2d');
     // mirror horizontally, so it acts like a reflection
     rawContext.translate(rawCanvas.width, 0);
@@ -106,15 +106,8 @@ function initializeDOMElements() {
     shadowCanvas.setAttribute('width', mWidth);
     shadowCanvas.setAttribute('height', mHeight);
     shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-    document.getElementById('capture').appendChild(shadowCanvas);
+    document.getElementById('canvasesdiv').appendChild(shadowCanvas);
     shadowContext = shadowCanvas.getContext('2d');
-        
-//    shapeCanvas = document.getElementById('shapeCanvas');
-//    shapeCanvas.setAttribute('width', mWidth);
-//    shapeCanvas.setAttribute('height', mHeight);
-//    shapeCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-//    document.getElementById('sandbox').appendChild(shapeCanvas);
-//    shapeContext = shapeCanvas.getContext('2d');
 
 	canvas0 = document.getElementById('canvas0');
     canvas0.setAttribute('width', mWidth);
@@ -122,28 +115,6 @@ function initializeDOMElements() {
     canvas0.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('canvasesdiv').appendChild(canvas0);
     canvas0Context = canvas0.getContext('2d');
- 
-	// var test = shapeContext.getImageData(0, 0, shapeCanvas.width, shapeCanvas.height);
-	// console.log("test");
-	// console.log(test.data[0]);
-	// console.log(test.data[1]);
-	// console.log(test.data[2]);
-	// console.log(test.data[3]);
-    //draw a square for now
-
-//    var imgData=shapeContext.createImageData(100,100);
-//	for (var i=0;i<imgData.data.length;i+=4)
-//	  {
-//	  imgData.data[i+0]=0;
-//	  imgData.data[i+1]=0;
-//	  imgData.data[i+2]=0;
-//	
-//		//this is where a problem is
-//	  imgData.data[i+3]=255;
-//	  }
-//	shapeContext.putImageData(imgData,0,0);
-//	shapeData = shapeContext.getImageData(0, 0, mWidth, mHeight);
-//	
 
 	canvas0Data = canvas0Context.createImageData(40, 40);
 	for (var j = 0; j < canvas0Data.data.length; j += 4) {

@@ -9,8 +9,10 @@
     </head>
 
     <body>
-
-		<div id="canvasesdiv" style="position:relative; width:400px; height:300px">
+		<div id="button">
+		<button id="background">Capture Background</button>
+		</div>
+		<div id="canvasesdiv" style="position:relative; width='500px'; height='500px'">
 					<canvas id="shadowCanvas"
 					style="z-index: 1;
 					position:absolute;
@@ -18,13 +20,7 @@
 					top:0px;">
 					This text is displayed if your browser does not support HTML5 Canvas.
 					</canvas>
-					<canvas id="shapeCanvas"
-					style="z-index: 2;
-					position:absolute;
-					left:0px;
-					top:0px;">
-					This text is displayed if your browser does not support HTML5 Canvas.
-					</canvas>
+					
 					<canvas id="canvas0"
 					style="z-index: 2;
 					position:absolute;
@@ -34,11 +30,7 @@
 					</canvas>
 				</div>
 			</div>
-			
-		<div id="capture">
-					<button id="background">Capture Background</button>     
-					<!--<button id="comp">compare</button>-->
-        </div>    
-
+		     
+		<!--<button id="comp">compare</button>-->
     </body>
 </html>
