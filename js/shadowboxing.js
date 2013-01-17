@@ -196,17 +196,21 @@ function hasOverlapTest(pixelData1, pixelData2) {
 	var hasOverlap = false;
 	
 	for (var i = 0; i < pixelData2.data.length; i = i + 4) {
-		var shapeR = pixelData2.data[i+0] == 0;
-		var shapeG = pixelData2.data[i+1] == 0;
-		var shapeB = pixelData2.data[i+2] == 0;
-		var shapePixelIsBlack = (shapeR && shapeG && shapeB);
+		var shapeR = (pixelData2.data[i] == 0);
+		var shapeG = (pixelData2.data[i+1] == 0);
+		var shapeB = (pixelData2.data[i+2] == 0);
+		var shapePixelIsBlack = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
 		
 		if (shapePixelIsBlack) {
-			var sandR = pixelData1.data[i+0] == 0;
-			var sandG = pixelData1.data[i+1] == 0;
-			var sandB = pixelData1.data[i+2] == 0;
-			var sandPixelIsBlack = (sandR && sandG && sandB);
+			var sandR = (pixelData1.data[i] == 0);
+			var sandG = (pixelData1.data[i+1] == 0);
+			var sandB = (pixelData1.data[i+2] == 0);
+			var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
 			if (sandPixelIsBlack) {
+				// console.log(pixelData1.data[i]);
+				// console.log(pixelData1.data[i+1]);
+				// console.log(pixelData1.data[i+2]);
+				// console.log(pixelData1.data[i+3]);
 				hasOverlap = true;
 			}
 		}
