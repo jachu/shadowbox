@@ -38,14 +38,14 @@ var mHeight = 400;
 var mediaStream, video, rawCanvas, rawContext, shadowCanvas, shadowContext, background = null;
 var started = false;
 
-var compareBlack = true;
-
 var allCanvases = [];	//array of 5 canvases, layered on top of each other
 var roundsShapes = [];	//array of rounds, each round is an array of 5 shapes, each shape is an array of points
 var currentRound = 0;
 
 var black = "#000000";
 var green = "#00FF00";
+
+var compareBlack;
 
 
 $(document).ready(function() {
@@ -80,11 +80,11 @@ function initializeRoundsShapes(){
 	
 	//each shape is an array of points
 	//have to do it this way because won't let you rotate shapes without rotating context as well
-	var round0shape0 = [{x: 187.5, y: 100}, {x: 312.5, y: 100}, {x: 312.5, y: 300}, {x:187.5, y:300}];
+	var round0shape0 = [{x: 187.5, y: 50}, {x: 312.5, y: 50}, {x: 312.5, y: 300}, {x:187.5, y:300}];
 	var round0shape1 = [{x: 125, y: 150}, {x: 187.5, y: 150}, {x: 187.5, y: 200}, {x: 125, y: 200}];
 	var round0shape2 = [{x: 312.5, y: 150}, {x: 375, y: 150}, {x: 375, y: 200}, {x: 312.5, y: 200}];
-	var round0shape3 = [{x: 187.5, y: 250}, {x: 187.5, y: 400}, {x: 125, y: 400}];
-	var round0shape4 = [{x: 312.5, y: 250}, {x: 375, y: 400}, {x: 312.5, y: 400}];
+	var round0shape3 = [{x: 187.5, y: 250}, {x: 250, y:300}, {x: 187.5, y: 400}, {x: 125, y: 400}];
+	var round0shape4 = [{x: 312.5, y: 250}, {x: 375, y: 400}, {x: 312.5, y: 400}, {x: 250, y:300}];
 	round0.push(round0shape0, round0shape1, round0shape2, round0shape3, round0shape4);
 	/*
 	var round1shape0 = {x: 50, y: 150, width: 50, height: 50};
@@ -323,47 +323,25 @@ function renderShape(shapeNum, color){
 
 
 /*
-iterate through pixelData1, if you encounter a black pixel, check that pixel in pixelData2
-if both are black, retrun true
+return true if you encounter a pixel where shadowData is black and shapeData is black or green
 */
-function hasOverlapTest(pixelData1, pixelData2) {	
-	if (compareBlack) {
-		for (var i = 0; i < pixelData2.data.length; i = i + 4) {
-			var shapeR = (pixelData2.data[i] == 0);
-			var shapeG = (pixelData2.data[i+1] == 0);
-			var shapeB = (pixelData2.data[i+2] == 0);
-			var shapePixelIsBlack = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
-
-			if (shapePixelIsBlack) {
-				var sandR = (pixelData1.data[i] == 0);
-				var sandG = (pixelData1.data[i+1] == 0);
-				var sandB = (pixelData1.data[i+2] == 0);
-				var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
-				if (sandPixelIsBlack) {
-					compareBlack = false;
-					return true;
-				}
-			}
-		}
-	} else {
-		for (var i = 0; i < pixelData2.data.length; i = i + 4) {
-			var shapeR = (pixelData2.data[i] == 0);
-			var shapeG = (pixelData2.data[i+1] == 255);
-			var shapeB = (pixelData2.data[i+2] == 0);
-			var shapePixelIsGreen = (shapeR && shapeG && shapeB && pixelData2.data[i+3] == 255);
+function hasOverlapTest(shadowData, shapeData) {
+	
+	for (var i = 0; i < shapeData.data.length; i = i + 4){
+		var shapeR = (shapeData.data[i] == 0);
+		var shapeG = (shapeData.data[i+1] == 0) || (shapeData.data[i+1] == 255);
+		var shapeB = (shapeData.data[i+2] == 0);
+		var shapeIsBlackOrGreen = (shapeR && shapeG && shapeB && shapeData.data[i+3] == 255);
 		
-			if (shapePixelIsGreen) {
-				var sandR = (pixelData1.data[i] == 0);
-				var sandG = (pixelData1.data[i+1] == 0);
-				var sandB = (pixelData1.data[i+2] == 0);
-				var sandPixelIsBlack = (sandR && sandG && sandB && pixelData1.data[i+3] == 255);
-				if (sandPixelIsBlack) {
-					return true;
-				}
+		if (shapeIsBlackOrGreen){
+			var shadowR = (shadowData.data[i] == 0);
+			var shadowG = (shadowData.data[i+1] == 0);
+			var shadowB = (shadowData.data[i+2] == 0);
+			if (shadowR && shadowG && shadowB && shadowData.data[i+3] == 255){
+				return true;
 			}
 		}
 	}
-	compareBlack = true;
 	return false;
 }
 
