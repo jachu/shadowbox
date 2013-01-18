@@ -53,6 +53,22 @@ var canvas0 = null;
 var canvas0Context = null;
 var canvas0Data = null;
 
+var canvas1 = null;
+var canvas1Context = null;
+var canvas1Data = null;
+
+var canvas2 = null;
+var canvas2Context = null;
+var canvas2Data = null;
+
+var canvas3 = null;
+var canvas3Context = null;
+var canvas3Data = null;
+
+var canvas4 = null;
+var canvas4Context = null;
+var canvas4Data = null;
+
 var shapes = [];
 var shapeContexts = [];
 
@@ -109,13 +125,44 @@ function initializeDOMElements() {
     document.getElementById('canvasesdiv').appendChild(shadowCanvas);
     shadowContext = shadowCanvas.getContext('2d');
 
+	//Create the 5 canvases to overlay
 	canvas0 = document.getElementById('canvas0');
     canvas0.setAttribute('width', mWidth);
     canvas0.setAttribute('height', mHeight);
     canvas0.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('canvasesdiv').appendChild(canvas0);
     canvas0Context = canvas0.getContext('2d');
+    
+    canvas1 = document.getElementById('canvas1');
+    canvas1.setAttribute('width', mWidth);
+    canvas1.setAttribute('height', mHeight);
+    canvas1.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(canvas1);
+    canvas1Context = canvas1.getContext('2d');
+    
+    canvas2 = document.getElementById('canvas2');
+    canvas2.setAttribute('width', mWidth);
+    canvas2.setAttribute('height', mHeight);
+    canvas2.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(canvas2);
+    canvas2Context = canvas2.getContext('2d');
+    
+    canvas3 = document.getElementById('canvas3');
+    canvas3.setAttribute('width', mWidth);
+    canvas3.setAttribute('height', mHeight);
+    canvas3.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(canvas3);
+    canvas3Context = canvas3.getContext('2d');
+    
+    canvas4 = document.getElementById('canvas4');
+    canvas4.setAttribute('width', mWidth);
+    canvas4.setAttribute('height', mHeight);
+    canvas4.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(canvas4);
+    canvas4Context = canvas4.getContext('2d');
 
+
+	//Populate each of the canvases with a shape
 	canvas0Data = canvas0Context.createImageData(40, 40);
 	for (var j = 0; j < canvas0Data.data.length; j += 4) {
 		canvas0Data.data[j+0] = 0;
@@ -125,8 +172,60 @@ function initializeDOMElements() {
 	}
 	canvas0Context.putImageData(canvas0Data, 0, 0);
 	canvas0Data = canvas0Context.getImageData(0, 0, mWidth, mHeight);
+	
+	canvas1Data = canvas1Context.createImageData(40, 40);
+	for (var j = 0; j < canvas1Data.data.length; j += 4) {
+		canvas1Data.data[j+0] = 0;
+		canvas1Data.data[j+1] = 0;
+		canvas1Data.data[j+2] = 0;
+		canvas1Data.data[j+3] = 255;
+	}
+	canvas1Context.putImageData(canvas1Data, 50, 0);
+	canvas1Data = canvas1Context.getImageData(0, 0, mWidth, mHeight);
+	
+	canvas2Data = canvas2Context.createImageData(40, 40);
+	for (var j = 0; j < canvas2Data.data.length; j += 4) {
+		canvas2Data.data[j+0] = 0;
+		canvas2Data.data[j+1] = 0;
+		canvas2Data.data[j+2] = 0;
+		canvas2Data.data[j+3] = 255;
+	}
+	canvas2Context.putImageData(canvas2Data, 100, 0);
+	canvas2Data = canvas2Context.getImageData(0, 0, mWidth, mHeight);
+	
+	canvas3Data = canvas3Context.createImageData(40, 40);
+	for (var j = 0; j < canvas3Data.data.length; j += 4) {
+		canvas3Data.data[j+0] = 0;
+		canvas3Data.data[j+1] = 0;
+		canvas3Data.data[j+2] = 0;
+		canvas3Data.data[j+3] = 255;
+	}
+	canvas3Context.putImageData(canvas3Data, 0, 50);
+	canvas3Data = canvas3Context.getImageData(0, 0, mWidth, mHeight);
+	
+	canvas4Data = canvas4Context.createImageData(40, 40);
+	for (var j = 0; j < canvas4Data.data.length; j += 4) {
+		canvas4Data.data[j+0] = 0;
+		canvas4Data.data[j+1] = 0;
+		canvas4Data.data[j+2] = 0;
+		canvas4Data.data[j+3] = 255;
+	}
+	canvas4Context.putImageData(canvas4Data, 50, 50);
+	canvas4Data = canvas4Context.getImageData(0, 0, mWidth, mHeight);
+	
+	
+	//Push each canvas and context onto the appropriate array
 	shapes.push(canvas0Data);
 	shapeContexts.push(canvas0Context);
+	shapes.push(canvas1Data);
+	shapeContexts.push(canvas1Context);
+	shapes.push(canvas2Data);
+	shapeContexts.push(canvas2Context);
+	shapes.push(canvas3Data);
+	shapeContexts.push(canvas3Context);
+	shapes.push(canvas4Data);
+	shapeContexts.push(canvas4Context);
+
 
 	
 }
@@ -376,15 +475,16 @@ function renderShadow() {
 	//sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
 
 	//if (hasOverlapTest(sandData, shapeData)) {
-		console.log(shapes[0]);
-	if (hasOverlapTest(pixelData, shapes[0])) {
-		//console.log("turn shape green func");
-		turnShapeGreen(shapes[0], shapeContexts[0]);
-	} else {
-		//console.log("turn back");
-		turnShapeBlack(shapes[0], shapeContexts[0]);
-	}
+	for (var i = 0; i < shapes.length; i ++) {
+		if (hasOverlapTest(pixelData, shapes[i])) {
+			//console.log("turn shape green func");
+			turnShapeGreen(shapes[i], shapeContexts[i]);
+		} else {
+			//console.log("turn back");
+			turnShapeBlack(shapes[i], shapeContexts[i]);
+		}
 	//End of test code.
+	}
 
   	setTimeout(renderShadow, 0);
 }
