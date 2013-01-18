@@ -9,23 +9,11 @@
  * Created by Michael Bernstein 2013
  */
 
-// Student-configurable options below...
-
-// show the after-gaussian blur camera input
 SHOW_RAW = false;
-// show the final shadow
 SHOW_SHADOW = true;
-// input option: kinectdepth (kinect depth sensor), kinectrgb (kinect camera), 
-// or webcam (computer camera)
-var INPUT = "webcam"; 
-// A difference of >= SHADOW_THRESHOLD across RGB space from the background
-// frame is marked as foreground
+var INPUT = "webcam";
 var SHADOW_THRESHOLD = 10;
-// Between 0 and 1: how much memory we retain of previous frames.
-// In other words, how much we let the background adapt over time to more recent frames
 var BACKGROUND_ALPHA = 0.05;
-// We run a gaussian blur over the input image to reduce random noise 
-// in the background subtraction. Change this radius to trade off noise for precision 
 var STACK_BLUR_RADIUS = 10; 
 
 var mWidth = 500;
@@ -38,10 +26,13 @@ var mHeight = 400;
 var mediaStream, video, rawCanvas, rawContext, shadowCanvas, shadowContext, background = null;
 var started = false;
 
+var testCanvas, testContext;
+
 var allCanvases = [];	//array of 5 canvases, layered on top of each other
 var roundsShapes = [];	//array of rounds, each round is an array of 5 shapes, each shape is an array of points
 var currentRound = 0;
 var TOTAL_ROUNDS = 3;
+//var inBetweenRounds = false;
 
 var black = "#000000";
 var green = "#00FF00";
@@ -82,8 +73,8 @@ function initializeRoundsShapes(){
 	var round0shape0 = [{x: 187.5, y: 50}, {x: 312.5, y: 50}, {x: 312.5, y: 300}, {x:187.5, y:300}];
 	var round0shape1 = [{x: 125, y: 150}, {x: 187.5, y: 150}, {x: 187.5, y: 200}, {x: 125, y: 200}];
 	var round0shape2 = [{x: 312.5, y: 150}, {x: 375, y: 150}, {x: 375, y: 200}, {x: 312.5, y: 200}];
-	var round0shape3 = [{x: 187.5, y: 250}, {x: 250, y:300}, {x: 187.5, y: 400}, {x: 125, y: 400}];
-	var round0shape4 = [{x: 312.5, y: 250}, {x: 375, y: 400}, {x: 312.5, y: 400}, {x: 250, y:300}];
+	var round0shape3 = [{x: 187.5, y: 300}, {x: 250, y:300}, {x: 250, y: 400}, {x: 187.5, y: 400}];
+	var round0shape4 = [{x: 250, y: 300}, {x: 312.5, y: 300}, {x: 312.5, y: 400}, {x: 250, y:400}];
 	round0.push(round0shape0, round0shape1, round0shape2, round0shape3, round0shape4);
 	
 	var round1shape0 = [{x: 0, y: 400}, {x: 62.5, y: 400}, {x: 125, y: 300}, {x:125, y:200}];
@@ -108,35 +99,7 @@ function initializeRoundsShapes(){
 	round3.push(round3shape0, round3shape1, round3shape2, round3shape3, round3shape4);
 	*/
 	roundsShapes.push(round0, round1, round2, round3);
-	console.log(roundsShapes);
-}
-
-/*
- * Creates the video and canvas elements
- */
-function initializeDOMElements() {
-	
-    video = document.createElement('video');
-    video.setAttribute('autoplay', true);
-    video.style.display = 'none';
-    
-    rawCanvas = document.createElement('canvas');
-    rawCanvas.setAttribute('id', 'rawCanvas');
-    rawCanvas.setAttribute('width', mWidth);
-    rawCanvas.setAttribute('height', mHeight);
-    rawCanvas.style.display = SHOW_RAW ? 'block' : 'none';
-    document.getElementById('canvasesdiv').appendChild(rawCanvas);
-    rawContext = rawCanvas.getContext('2d');
-    // mirror horizontally, so it acts like a reflection
-    rawContext.translate(rawCanvas.width, 0);
-    rawContext.scale(-1,1);	
-    
-    shadowCanvas = document.getElementById('shadowCanvas');
-    shadowCanvas.setAttribute('width', mWidth);
-    shadowCanvas.setAttribute('height', mHeight);
-    shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
-    document.getElementById('canvasesdiv').appendChild(shadowCanvas);
-    shadowContext = shadowCanvas.getContext('2d');
+	//console.log(roundsShapes);
 }
 
 /*
@@ -179,7 +142,157 @@ function initializeDOMElements() {
 	displayRound(currentRound);
 }
 
+/*
+ * In a loop: gets the current frame of video, thresholds it to the background frames,
+ * and outputs the difference as a shadow.
+ */
+function renderShadow() {
+  	if (!background) { return; }
+  	pixelData = getShadowData();  	
+  	shadowContext.putImageData(pixelData, 0, 0);
+  	renderShapeCanvases(pixelData);
+  	setTimeout(renderShadow, 0);
+}
 
+//shapes is an array of 5 shapes
+//each shape is an array of points
+function renderShapeCanvases(pixelData) {
+	var numGreen = 0;
+	
+	for (c in allCanvases) {
+		var context = (allCanvases[c].canvas).getContext('2d');
+		var canvasData = context.getImageData(0, 0, mWidth, mHeight);
+		if (hasOverlap(pixelData, canvasData)) {
+			numGreen++;
+			renderShape(c, green);
+		}
+		else {
+			numGreen--;
+			renderShape(c, black);
+		}
+	}
+	
+	//console.log(getPixelsInBackground(pixelData));
+	if (numGreen >= 5 && (getPixelsInBackground(pixelData) < 800)) {
+		currentRound = (currentRound <= (TOTAL_ROUNDS - 1)) ? (currentRound + 1) : 0;
+		displayRound(currentRound, black);
+	}
+}
+
+function getPixelsInBackground(shadowData) {
+	var numPixels = 0;
+	var backgroundData = testContext.getImageData(0, 0, mWidth, mHeight);
+	
+	for (var i = 0; i < pixelData.data.length; i = i + 4){
+		var bgR = (backgroundData.data[i] == 0);
+		var bgG = (backgroundData.data[i+1] == 0);
+		var bgB = (backgroundData.data[i+2] == 0);
+		var backgroundIsBlack = (bgR && bgG && bgB && backgroundData.data[i+3] == 255);
+		
+		var shadowR = (shadowData.data[i] == 0);
+		var shadowG = (shadowData.data[i+1] == 0);
+		var shadowB = (shadowData.data[i+2] == 0);
+		var shadowIsBlack = (shadowR && shadowG && shadowB && shadowData.data[i+3] == 255);
+		
+		if (backgroundIsBlack && shadowIsBlack) {
+			numPixels++;
+		}
+	}
+	return numPixels;
+}
+
+function initBackgroundData(){
+	var thisRoundsShapes = roundsShapes[currentRound];
+	for (shape in thisRoundsShapes){
+		testCanvas.width = testCanvas.width;
+	}
+	
+	testContext.beginPath();
+	testContext.moveTo(0,0);
+	testContext.lineTo(mWidth, 0);
+	testContext.lineTo(mWidth, mHeight);
+	testContext.lineTo(0, mHeight);
+	testContext.fillStyle=black;
+	testContext.fill();
+	
+	for (shape in thisRoundsShapes){
+		var thisShape = roundsShapes[currentRound][shape];
+		testContext.beginPath();
+		for (point in thisShape) {
+			if (point == 0) {
+				testContext.moveTo(thisShape[point].x, thisShape[point].y);
+			}
+			else {
+				testContext.lineTo(thisShape[point].x, thisShape[point].y);
+			}
+		}
+		testContext.fillStyle="#ffffff";
+		testContext.fill();
+	}
+}
+
+function renderShape(shapeNum, color) {
+	var context = (allCanvases[shapeNum].canvas).getContext('2d');
+	var thisShape = roundsShapes[currentRound][shapeNum];
+	
+	context.beginPath();
+	for (point in thisShape) {
+		if (point == 0) {
+				context.moveTo(thisShape[point].x, thisShape[point].y);
+			}
+			else {
+				context.lineTo(thisShape[point].x, thisShape[point].y);
+			}
+	}
+	context.fillStyle=color;
+	context.fill();
+}
+
+function displayRound(roundNum){
+	var thisRoundsShapes = roundsShapes[roundNum];
+	for (shape in thisRoundsShapes){
+		(allCanvases[shape].canvas).width = (allCanvases[shape].canvas).width;
+	}
+	for (shape in thisRoundsShapes){
+		renderShape(shape, black);
+	}
+	
+	initBackgroundData();
+}
+
+
+/*
+Return true if you encounter a pixel where shadowData is black and shapeData is black or green
+*/
+function hasOverlap(shadowData, shapeData) {
+	
+	for (var i = 0; i < shapeData.data.length; i = i + 4){
+		var shapeR = (shapeData.data[i] == 0);
+		var shapeG = (shapeData.data[i+1] == 0) || (shapeData.data[i+1] == 255);
+		var shapeB = (shapeData.data[i+2] == 0);
+		var shapeIsBlackOrGreen = (shapeR && shapeG && shapeB && shapeData.data[i+3] == 255);
+		
+		if (shapeIsBlackOrGreen){
+			var shadowR = (shadowData.data[i] == 0);
+			var shadowG = (shadowData.data[i+1] == 0);
+			var shadowB = (shadowData.data[i+2] == 0);
+			if (shadowR && shadowG && shadowB && shadowData.data[i+3] == 255){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+
+
+/************************************************************
+ * SCAFFOLDING
+ *************************************************************/
+ 
+ 
 /*
  * Starts webcam capture
  */
@@ -214,59 +327,41 @@ function setUpWebCam() {
 
 
 /*
- * Remembers the current pixels as the background to subtract.
+ * Creates the video and canvas elements
  */
-function setBackground() {
-    var pixelData = getCameraData();
-    background = pixelData;
-}
-
-
-/*
- * In a loop: gets the current frame of video, thresholds it to the background frames,
- * and outputs the difference as a shadow.
- */
-function renderShadow() {
-  	if (!background) { return; }
-  	pixelData = getShadowData();  	
-  	shadowContext.putImageData(pixelData, 0, 0);
-  	renderShapeCanvases(pixelData);
-  	setTimeout(renderShadow, 0);
-}
-
-//shapes is an array of 5 shapes
-//each shape is an array of points
-function renderShapeCanvases(pixelData) {
-	var numGreen = 0;
-	for (c in allCanvases) {
-		var context = (allCanvases[c].canvas).getContext('2d');
-		var canvasData = context.getImageData(0, 0, mWidth, mHeight);
-		if (hasOverlap(pixelData, canvasData)){
-			numGreen++;
-			renderShape(c, green);
-		}
-		else{
-			numGreen--;
-			renderShape(c, black);
-		}
-	}
+function initializeDOMElements() {
 	
-	if (numGreen >= 5){
-		currentRound = (currentRound <= (TOTAL_ROUNDS - 1)) ? (currentRound + 1) : 0;
-		/*setInterval(function(){
-			var note = document.getElementById('note');
-			note.innerText = "ROUND " + currentRound;
-			note.visibility = "visible";
-		},3000);*/
-		displayRound(currentRound, black);
-	}
+    video = document.createElement('video');
+    video.setAttribute('autoplay', true);
+    video.style.display = 'none';
+    
+    rawCanvas = document.createElement('canvas');
+    rawCanvas.setAttribute('id', 'rawCanvas');
+    rawCanvas.setAttribute('width', mWidth);
+    rawCanvas.setAttribute('height', mHeight);
+    rawCanvas.style.display = SHOW_RAW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(rawCanvas);
+    rawContext = rawCanvas.getContext('2d');
+    // mirror horizontally, so it acts like a reflection
+    rawContext.translate(rawCanvas.width, 0);
+    rawContext.scale(-1,1);	
+    
+    shadowCanvas = document.getElementById('shadowCanvas');
+    shadowCanvas.setAttribute('width', mWidth);
+    shadowCanvas.setAttribute('height', mHeight);
+    shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    document.getElementById('canvasesdiv').appendChild(shadowCanvas);
+    shadowContext = shadowCanvas.getContext('2d');
+    
+    testCanvas = document.getElementById('testCanvas');
+    testCanvas.setAttribute('width', mWidth);
+    testCanvas.setAttribute('height', mHeight);
+    testCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    testContext = testCanvas.getContext('2d');
+    console.log(testCanvas);
+    console.log(testContext);
 }
 
-
-
-/************************************************************
- * HELPER FUNCTIONS
- *************************************************************/
 /*
  * Returns an ImageData object that contains black pixels for the shadow
  * and white pixels for the background
@@ -291,8 +386,6 @@ function getShadowData() {
             pixelData.data[i+1] = 0;
             pixelData.data[i+2] = 0;
         } else {
-            // background
-            
             //  update model of background, since we think this is in the background
             updateBackground(i, rCurrent, gCurrent, bCurrent, rBackground, gBackground, bBackground);
             
@@ -302,62 +395,16 @@ function getShadowData() {
             pixelData.data[i+2] = 255;
             pixelData.data[i+3] = 0;
         }
-    }
-    
+    }   
     return pixelData; 
 }
 
-
-function displayRound(roundNum){
-	var thisRoundsShapes = roundsShapes[roundNum];
-	for (shape in thisRoundsShapes){
-		(allCanvases[shape].canvas).width = (allCanvases[shape].canvas).width;
-	}
-	for (shape in thisRoundsShapes){
-		renderShape(shape, black);
-	}
-}
-
-function renderShape(shapeNum, color){
-	
-	var context = (allCanvases[shapeNum].canvas).getContext('2d');
-	var thisShape = roundsShapes[currentRound][shapeNum];
-	
-	context.beginPath();
-	for (point in thisShape){
-		if (point == 0){
-				context.moveTo(thisShape[point].x, thisShape[point].y);
-			}
-			else{
-				context.lineTo(thisShape[point].x, thisShape[point].y);
-			}
-	}
-	context.fillStyle=color;
-	context.fill();
-}
-
-
 /*
-return true if you encounter a pixel where shadowData is black and shapeData is black or green
-*/
-function hasOverlap(shadowData, shapeData) {
-	
-	for (var i = 0; i < shapeData.data.length; i = i + 4){
-		var shapeR = (shapeData.data[i] == 0);
-		var shapeG = (shapeData.data[i+1] == 0) || (shapeData.data[i+1] == 255);
-		var shapeB = (shapeData.data[i+2] == 0);
-		var shapeIsBlackOrGreen = (shapeR && shapeG && shapeB && shapeData.data[i+3] == 255);
-		
-		if (shapeIsBlackOrGreen){
-			var shadowR = (shadowData.data[i] == 0);
-			var shadowG = (shadowData.data[i+1] == 0);
-			var shadowB = (shadowData.data[i+2] == 0);
-			if (shadowR && shadowG && shadowB && shadowData.data[i+3] == 255){
-				return true;
-			}
-		}
-	}
-	return false;
+ * Remembers the current pixels as the background to subtract.
+ */
+function setBackground() {
+    var pixelData = getCameraData();
+    background = pixelData;
 }
 
 /*
@@ -379,9 +426,11 @@ function updateBackground(i, rCurrent, gCurrent, bCurrent, rBackground, gBackgro
     background.data[i+2] = Math.round(BACKGROUND_ALPHA * bCurrent + (1-BACKGROUND_ALPHA) * bBackground);
 }
 
+
 /*
  * Returns the distance between two pixels in grayscale space
  */
 function pixelDistance(r1, g1, b1, r2, g2, b2) {
     return Math.abs((r1+g1+b1)/3 - (r2+g2+b2)/3);
 }
+
