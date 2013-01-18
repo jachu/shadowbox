@@ -41,11 +41,10 @@ var started = false;
 var allCanvases = [];	//array of 5 canvases, layered on top of each other
 var roundsShapes = [];	//array of rounds, each round is an array of 5 shapes, each shape is an array of points
 var currentRound = 0;
+var TOTAL_ROUNDS = 3;
 
 var black = "#000000";
 var green = "#00FF00";
-
-var compareBlack;
 
 
 $(document).ready(function() {
@@ -86,21 +85,21 @@ function initializeRoundsShapes(){
 	var round0shape3 = [{x: 187.5, y: 250}, {x: 250, y:300}, {x: 187.5, y: 400}, {x: 125, y: 400}];
 	var round0shape4 = [{x: 312.5, y: 250}, {x: 375, y: 400}, {x: 312.5, y: 400}, {x: 250, y:300}];
 	round0.push(round0shape0, round0shape1, round0shape2, round0shape3, round0shape4);
-	/*
-	var round1shape0 = {x: 50, y: 150, width: 50, height: 50};
-	var round1shape1 = {x: 150, y: 150, width: 50, height: 50};
-	var round1shape2 = {x: 250, y: 150, width: 50, height: 50};
-	var round1shape3 = {x: 350, y: 150, width: 50, height: 50};
-	var round1shape4 = {x: 450, y: 150, width: 50, height: 50};
+	
+	var round1shape0 = [{x: 0, y: 400}, {x: 62.5, y: 400}, {x: 125, y: 300}, {x:125, y:200}];
+	var round1shape1 = [{x: 125, y: 200}, {x: 125, y: 300}, {x: 187.5, y: 400}, {x: 250, y: 400}];
+	var round1shape2 = [{x: 250, y: 200}, {x: 350, y: 200}, {x: 350, y: 250}, {x: 250, y: 250}];
+	var round1shape3 = [{x: 350, y: 100}, {x: 400, y:100}, {x: 400, y: 400}, {x: 350, y: 400}];
+	var round1shape4 = [{x: 400, y: 200}, {x: 500, y: 200}, {x: 500, y: 250}, {x: 400, y:250}];
 	round1.push(round1shape0, round1shape1, round1shape2, round1shape3, round1shape4);
-	
-	var round2shape0 = {x: 50, y: 250, width: 50, height: 50};
-	var round2shape1 = {x: 150, y: 250, width: 50, height: 50};
-	var round2shape2 = {x: 250, y: 250, width: 50, height: 50};
-	var round2shape3 = {x: 350, y: 250, width: 50, height: 50};
-	var round2shape4 = {x: 450, y: 250, width: 50, height: 50};
+
+	var round2shape0 = [{x: 0, y: 400}, {x: 125, y: 200}, {x: 125, y: 300}, {x:62.5, y:400}];
+	var round2shape1 = [{x: 125, y: 200}, {x: 125, y: 300}, {x: 187.5, y: 400}, {x: 250, y: 400}];
+	var round2shape2 = [{x: 125, y: 200}, {x: 187.5, y: 300}, {x: 437.5, y: 300}, {x: 437.5, y: 200}];
+	var round2shape3 = [{x: 250, y: 100}, {x: 250, y:200}, {x: 375, y: 200}];
+	var round2shape4 = [{x: 312.5, y: 300}, {x: 437.5, y: 300}, {x: 437.5, y: 400}];
 	round2.push(round2shape0, round2shape1, round2shape2, round2shape3, round2shape4);
-	
+	/*
 	var round3shape0 = {x: 50, y: 350, width: 50, height: 50};
 	var round3shape1 = {x: 150, y: 350, width: 50, height: 50};
 	var round3shape2 = {x: 250, y: 350, width: 50, height: 50};
@@ -177,7 +176,7 @@ function initializeDOMElements() {
 					{canvas: canvas3, isGreen: false},
 					{canvas: canvas4, isGreen: false});
 	
-	displayRound(currentRound, black);
+	displayRound(currentRound);
 }
 
 
@@ -238,15 +237,28 @@ function renderShadow() {
 //shapes is an array of 5 shapes
 //each shape is an array of points
 function renderShapeCanvases(pixelData) {
+	var numGreen = 0;
 	for (c in allCanvases) {
 		var context = (allCanvases[c].canvas).getContext('2d');
 		var canvasData = context.getImageData(0, 0, mWidth, mHeight);
-		if (hasOverlapTest(pixelData, canvasData)){
+		if (hasOverlap(pixelData, canvasData)){
+			numGreen++;
 			renderShape(c, green);
 		}
 		else{
+			numGreen--;
 			renderShape(c, black);
 		}
+	}
+	
+	if (numGreen >= 5){
+		currentRound = (currentRound <= (TOTAL_ROUNDS - 1)) ? (currentRound + 1) : 0;
+		/*setInterval(function(){
+			var note = document.getElementById('note');
+			note.innerText = "ROUND " + currentRound;
+			note.visibility = "visible";
+		},3000);*/
+		displayRound(currentRound, black);
 	}
 }
 
@@ -296,10 +308,13 @@ function getShadowData() {
 }
 
 
-function displayRound(roundNum, color){
+function displayRound(roundNum){
 	var thisRoundsShapes = roundsShapes[roundNum];
 	for (shape in thisRoundsShapes){
-		renderShape(shape, color);
+		(allCanvases[shape].canvas).width = (allCanvases[shape].canvas).width;
+	}
+	for (shape in thisRoundsShapes){
+		renderShape(shape, black);
 	}
 }
 
@@ -325,7 +340,7 @@ function renderShape(shapeNum, color){
 /*
 return true if you encounter a pixel where shadowData is black and shapeData is black or green
 */
-function hasOverlapTest(shadowData, shapeData) {
+function hasOverlap(shadowData, shapeData) {
 	
 	for (var i = 0; i < shapeData.data.length; i = i + 4){
 		var shapeR = (shapeData.data[i] == 0);
@@ -370,77 +385,3 @@ function updateBackground(i, rCurrent, gCurrent, bCurrent, rBackground, gBackgro
 function pixelDistance(r1, g1, b1, r2, g2, b2) {
     return Math.abs((r1+g1+b1)/3 - (r2+g2+b2)/3);
 }
-
-
-//function compare() {
-//	
-//	//Currently, renderShadow does all of the following code. So, we don't need to press the
-//	//compare button anymore. This is just a test though.
-//	
-//	sandContext.putImageData(pixelData, 0, 0);
-//	sandData = sandContext.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
-//
-//	if (hasOverlapTest(sandData, shapeData)) {
-//		//console.log("turn shape green func");
-//		turnShapeGreen(shapeData);
-//	} else {
-//		//console.log("turn back");
-//		turnShapeBlack(shapeData);
-//	}
-//	
-//	setTimeout(compare, 0);
-//	
-//	//sandContext.putImageData(shapeData, 0, 0);
-//	
-//	//need to compare the sandData to the shapeData
-//	
-//	
-//	/* LAO'S SIMON SAYS COMPARE
-//	console.log("pixel data data");
-//	var match = true;
-//	
-//	for (var i = 0; i < sandData.data.length; i = i + 4) {
-//		//console.log(sandData.data[i]);
-//		//console.log(sandData.data[i+1]);
-//		//console.log(sandData.data[i+2]);
-//		var r0 = sandData.data[i] == 0;
-//		var g0 = sandData.data[i+1] == 0;
-//		var b0 = sandData.data[i+2] == 0;
-//		var isShadow = (r0 && g0 && b0);
-//		
-//		if (!isShadow) {
-//		
-//			var r255 = doData.data[i] == 255;
-//			//if (r) console.log("r match");
-//			// if (!r) {
-//			// 	match = false;
-//			// }
-//			var g255 = doData.data[i+1] == 255;
-//			//if (g) console.log("r match");
-//			// if (!g) {
-//			// 	match = false;
-//			// }
-//			var b255 = doData.data[i+2] == 255;
-//			//if (b) console.log("r match");
-//			// if (!b) {
-//			// 	match = false;
-//			// }
-//			
-//			var isWhite = (r255 && g255 && b255);
-//		
-//			if (!isWhite) {
-//				match = false;
-//				doData.data[i] = 255;
-//				doData.data[i+1] = 0;
-//				doData.data[i+2] = 0;
-//			}
-//		}
-//	}
-//	if (match) {
-//		console.log("match!");
-//	} else {
-//		console.log("no match");
-//		doContext.putImageData(doData, 0, 0);
-//	}
-//	*/
-//}
