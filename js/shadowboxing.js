@@ -73,34 +73,34 @@ function initializeRoundsShapes(){
 	//each shape is an array of points
 	//have to do it this way because won't let you rotate shapes without rotating context as well
 	var round0shape0 = [{x: 187.5, y: 50}, {x: 312.5, y: 50}, {x: 312.5, y: 300}, {x:187.5, y:300}];
-	var round0shape1 = [{x: 125, y: 150}, {x: 187.5, y: 150}, {x: 187.5, y: 200}, {x: 125, y: 200}];
-	var round0shape2 = [{x: 312.5, y: 150}, {x: 375, y: 150}, {x: 375, y: 200}, {x: 312.5, y: 200}];
-	var round0shape3 = [{x: 187.5, y: 300}, {x: 250, y:300}, {x: 250, y: 400}, {x: 187.5, y: 400}];
-	var round0shape4 = [{x: 250, y: 300}, {x: 312.5, y: 300}, {x: 312.5, y: 400}, {x: 250, y:400}];
+	var round0shape1 = [{x: 100, y: 150}, {x: 187.5, y: 150}, {x: 187.5, y: 200}, {x: 100, y: 200}];
+	var round0shape2 = [{x: 312.5, y: 150}, {x: 400, y: 150}, {x: 400, y: 200}, {x: 312.5, y: 200}];
+	var round0shape3 = [{x: 187.5, y: 250}, {x: 250, y:300}, {x: 187.5, y: 400}, {x: 125, y: 400}];
+	var round0shape4 = [{x: 312.5, y: 250}, {x: 375, y: 400}, {x: 312.5, y: 400}, {x: 250, y:300}];
 	round0.push(round0shape0, round0shape1, round0shape2, round0shape3, round0shape4);
 	
-	var round1shape0 = [{x: 0, y: 400}, {x: 62.5, y: 400}, {x: 125, y: 300}, {x:125, y:200}];
-	var round1shape1 = [{x: 125, y: 200}, {x: 125, y: 300}, {x: 187.5, y: 400}, {x: 250, y: 400}];
+	var round1shape0 = [{x: 0, y: 400}, {x: 92.5, y: 400}, {x: 125, y: 300}, {x:125, y:200}];
+	var round1shape1 = [{x: 125, y: 200}, {x: 125, y: 300}, {x: 157.5, y: 400}, {x: 250, y: 400}];
 	var round1shape2 = [{x: 250, y: 200}, {x: 350, y: 200}, {x: 350, y: 250}, {x: 250, y: 250}];
-	var round1shape3 = [{x: 350, y: 100}, {x: 400, y:100}, {x: 400, y: 400}, {x: 350, y: 400}];
+	var round1shape3 = [{x: 300, y: 100}, {x: 450, y:100}, {x: 400, y: 400}, {x: 350, y: 400}];
 	var round1shape4 = [{x: 400, y: 200}, {x: 500, y: 200}, {x: 500, y: 250}, {x: 400, y:250}];
 	round1.push(round1shape0, round1shape1, round1shape2, round1shape3, round1shape4);
-
-	var round2shape0 = [{x: 0, y: 400}, {x: 125, y: 200}, {x: 125, y: 300}, {x:62.5, y:400}];
-	var round2shape1 = [{x: 125, y: 200}, {x: 125, y: 300}, {x: 187.5, y: 400}, {x: 250, y: 400}];
-	var round2shape2 = [{x: 125, y: 200}, {x: 187.5, y: 300}, {x: 437.5, y: 300}, {x: 437.5, y: 200}];
-	var round2shape3 = [{x: 250, y: 100}, {x: 250, y:200}, {x: 375, y: 200}];
-	var round2shape4 = [{x: 312.5, y: 300}, {x: 437.5, y: 300}, {x: 437.5, y: 400}];
+	
+	var round2shape0 = [{x: 100, y: 400}, {x: 100, y: 100}, {x: 150, y: 100}, {x:200, y:400}];
+	var round2shape1 = [{x: 150, y: 150}, {x: 200, y: 150}, {x: 200, y: 200}, {x: 150, y: 200}];
+	var round2shape2 = [{x: 200, y: 150}, {x: 300, y: 150}, {x: 300, y: 200}, {x: 200, y: 200}];
+	var round2shape3 = [{x: 300, y: 150}, {x: 350, y:150}, {x: 350, y: 200}, {x: 300, y:200}];
+	var round2shape4 = [{x: 350, y: 100}, {x: 400, y: 100}, {x: 400, y: 400}, {x:300, y:400}];
 	round2.push(round2shape0, round2shape1, round2shape2, round2shape3, round2shape4);
-	/*
-	var round3shape0 = {x: 50, y: 350, width: 50, height: 50};
-	var round3shape1 = {x: 150, y: 350, width: 50, height: 50};
-	var round3shape2 = {x: 250, y: 350, width: 50, height: 50};
-	var round3shape3 = {x: 350, y: 350, width: 50, height: 50};
-	var round3shape4 = {x: 450, y: 350, width: 50, height: 50};
+	
+	var round3shape0 = [{x: 0, y: 200}, {x: 50, y: 200}, {x: 150, y: 400}, {x:100, y:400}, {x:0, y:250}];
+	var round3shape1 = [{x: 50, y: 250}, {x: 150, y: 200}, {x: 200, y: 250}, {x: 100, y: 300}];
+	var round3shape2 = [{x: 100, y: 350}, {x: 250, y: 350}, {x: 250, y: 400}, {x: 100, y: 400}];
+	var round3shape3 = [{x: 300, y: 200}, {x: 350, y:150}, {x: 500, y: 200}, {x: 500, y: 250}, {x:450, y:250}];
+	var round3shape4 = [{x: 450, y: 250}, {x: 500, y: 250}, {x: 500, y: 400}, {x: 400, y:400}];
 	round3.push(round3shape0, round3shape1, round3shape2, round3shape3, round3shape4);
-	*/
-	roundsShapes.push(round0, round1, round2);
+	
+	roundsShapes.push(round0, round1, round2, round3);
 }
 
 /*
@@ -149,7 +149,7 @@ function initializeRoundsShapes(){
  */
 function initBackgroundData(){
 	var thisRoundsShapes = roundsShapes[currentRound];
-	for (shape in thisRoundsShapes){
+	for (var shape in thisRoundsShapes){
 		backgroundCanvas.width = backgroundCanvas.width;
 	}
 	
@@ -161,10 +161,10 @@ function initBackgroundData(){
 	backgroundContext.fillStyle=black;
 	backgroundContext.fill();
 	
-	for (shape in thisRoundsShapes){
+	for (var shape in thisRoundsShapes){
 		var thisShape = roundsShapes[currentRound][shape];
 		backgroundContext.beginPath();
-		for (point in thisShape) {
+		for (var point in thisShape) {
 			if (point == 0) {
 				backgroundContext.moveTo(thisShape[point].x, thisShape[point].y);
 			}
@@ -204,7 +204,7 @@ function renderShadow() {
 function renderShapeCanvases(pixelData) {
 	var numGreen = 0;
 	
-	for (c in allCanvases) {
+	for (var c in allCanvases) {
 		var context = (allCanvases[c].canvas).getContext('2d');
 		var canvasData = context.getImageData(0, 0, mWidth, mHeight);
 		if (hasOverlap(pixelData, canvasData)) {
@@ -217,10 +217,11 @@ function renderShapeCanvases(pixelData) {
 		}
 	}
 	
+	//console.log(getPixelsInBackground(pixelData));
 	// If all shapes are green and there aren't too many shadows left in the background,
 	// move on to the next round
-	if (numGreen >= 5 && (getPixelsInBackground(pixelData) < 800)) {
-		currentRound = (currentRound <= (TOTAL_ROUNDS - 1)) ? (currentRound + 1) : 0;
+	if (numGreen >= 5 && (getPixelsInBackground(pixelData) < 7000)) {	//change threshold here
+		currentRound = (currentRound < (TOTAL_ROUNDS)) ? (currentRound + 1) : 0;
 		displayRound(currentRound, black);
 	}
 }
@@ -230,10 +231,11 @@ function renderShapeCanvases(pixelData) {
  */
 function renderShape(shapeNum, color) {
 	var context = (allCanvases[shapeNum].canvas).getContext('2d');
+	//console.log(currentRound);
 	var thisShape = roundsShapes[currentRound][shapeNum];
 	
 	context.beginPath();
-	for (point in thisShape) {
+	for (var point in thisShape) {
 		if (point == 0) {
 				context.moveTo(thisShape[point].x, thisShape[point].y);
 			}
@@ -251,10 +253,10 @@ function renderShape(shapeNum, color) {
  */
 function displayRound(roundNum){
 	var thisRoundsShapes = roundsShapes[roundNum];
-	for (shape in thisRoundsShapes){
+	for (var shape in thisRoundsShapes){
 		(allCanvases[shape].canvas).width = (allCanvases[shape].canvas).width;
 	}
-	for (shape in thisRoundsShapes){
+	for (var shape in thisRoundsShapes){
 		renderShape(shape, black);
 	}
 	
